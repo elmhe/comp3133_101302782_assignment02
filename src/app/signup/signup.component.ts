@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
-import { FormControl, FormGroup, Validators, ValidatorFn } from '@angular/forms';
+import { FormControl, FormBuilder, FormGroup, Validators, ValidatorFn } from '@angular/forms';
+import { Router } from '@angular/router';
+import { NetworkService } from '../network.service';
 
 @Component({
   selector: 'app-signup',
@@ -8,29 +10,39 @@ import { FormControl, FormGroup, Validators, ValidatorFn } from '@angular/forms'
 })
 export class SignupComponent {
 
-  signupForm = new FormGroup({
-    name: new FormControl('', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]),
-    email: new FormControl('', [Validators.required, Validators.email,]), // this.emailExistsValidator()
-    password: new FormControl('', [Validators.required, Validators.minLength(6), Validators.maxLength(20)])
-  });
+  signupData: any = {};
 
-  constructor() { }
+  signupForm: FormGroup;
+  submitted = false;
+  error = '';
 
-  signup(name: string, email: string, password: string) {
-    // Create a new user and store their information
-    // const newUser = { name, email, password };
-    const newUser = this.signupForm.value;
-    localStorage.setItem('users', JSON.stringify([newUser]));
+  constructor(
+    private formBuilder: FormBuilder,
+    private router: Router,
+    private networkService: NetworkService
+  ) {
+    this.signupForm = this.formBuilder.group({
+      email: ['', Validators.required],
+      password: ['', Validators.required]
+    });
   }
 
-  // emailExistsValidator(): ValidatorFn {
-  //   return (control: FormControl): {[key: string]: any} | null => {
-  //     const users = JSON.parse(localStorage.getItem('users'));
-  //     if (users && users.some(user => user.email === control.value)) {
-  //       return { 'emailExists': true };
-  //     }
-  //     return null;
-  //   };
-  // }
+  get form() { return this.signupForm.controls; }
+
+  onSubmit() {
+    this.submitted = true;
+    if (this.signupForm.invalid) {
+      return;
+    }
+    this.networkService.signup(this.form['email'].value, this.form['password'].value)
+      .subscribe({
+        next: () => {
+          this.router.navigate(['/']);
+        },
+        error: (error) => {
+          this.error = error;
+        }
+      });
+  }
 
 }

@@ -1,45 +1,28 @@
 import { Component } from '@angular/core';
+import { NetworkService } from './network.service';
 import { Apollo, gql } from 'apollo-angular';
-
-const EMPLOYEES_QUERY = gql`
-  query getAllEmployees {
-    getAllEmployees {
-      id
-      firstName
-      lastName
-      email
-      phone
-    }
-  }
-`;
+import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  template: `
-    <h1>Employees List</h1>
-    <ul>
-      <li *ngFor="let employee of employees$ | async">
-        {{ employee.firstName }} {{ employee.lastName }}
-      </li>
-    </ul>
-  `,
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = '101302782_comp3133_assignment02';
+  // title = '101302782_comp3133_assignment02';
 
-  employees$ = this.apollo.query<{ getAllEmployees: Employee[] }>({
-    query: EMPLOYEES_QUERY,
-  })//.pipe(map(res => res.data.getAllEmployees));
+  constructor(public networkService: NetworkService,) {}
+  
+  login(email: string, password: string) {
+    // Call the login method of the network service
+    this.networkService.login(email, password);
+  }
 
-  constructor(private apollo: Apollo) {}
+  logout() {
+    // Call the logout method of the network service
+    this.networkService.logout();
+  }
+  
 }
 
-interface Employee {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-}
